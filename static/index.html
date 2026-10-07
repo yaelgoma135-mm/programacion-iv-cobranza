@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor de Cobranza · Proyección Monte Carlo</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <header>
+    <div class="contenedor cabecera">
+      <div>
+        <h1>Gestor de Cobranza</h1>
+        <p class="sutil">Proyección de flujo por simulación Monte Carlo</p>
+      </div>
+      <!--
+        El latido es la prueba visual de la concurrencia: late varias veces por
+        segundo contra /api/proyecciones/latido. Si el servidor se bloquea, se
+        detiene a la vista de todos.
+      -->
+      <div class="latido" id="latido">
+        <span class="pulso" id="pulso"></span>
+        <div>
+          <strong id="latido-estado">conectando…</strong>
+          <span class="sutil" id="latido-detalle">—</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenedor">
+    <nav class="pestanas" id="pestanas">
+      <button class="activa" data-panel="panel-proyeccion">Proyección</button>
+      <button data-panel="panel-clientes">Clientes</button>
+      <button data-panel="panel-facturas">Facturas</button>
+    </nav>
+
+    <!-- ───────────────────── Proyección ───────────────────── -->
+    <section id="panel-proyeccion" class="panel">
+      <div class="tarjeta">
+        <h2>Simular la cobranza</h2>
+        <p class="sutil">
+          Cada escenario sortea, para cada factura, si se cobra y en qué día, usando el
+          atraso histórico del cliente. Con miles de escenarios se obtiene el rango
+          esperado en vez de un número único y falso.
+        </p>
+
+        <div class="fila">
+          <label>
+            Escenarios
+            <input type="number" id="escenarios" value="50000" min="1000" step="1000">
+            <small class="sutil">Más escenarios = más precisión y más CPU</small>
+          </label>
+          <label>
+            Horizontes (días, separados por coma)
+            <input type="text" id="horizontes" value="30, 60, 90">
+          </label>
+        </div>
+
+        <div class="botones">
+          <button id="btn-proyectar" class="primario">
+            Proyectar sin bloquear
+            <small>asyncio.to_thread()</small>
+          </button>
+          <button id="btn-bloquear" class="peligro">
+            Proyectar bloqueando
+            <small>la forma incorrecta</small>
+          </button>
+        </div>
+        <p class="aviso">
+          Mire el latido de arriba mientras corre cada uno. Con el botón azul sigue
+          pulsando; con el rojo se congela hasta que el cálculo termina.
+        </p>
+
+        <div id="proyeccion-resultado"></div>
+      </div>
+    </section>
+
+    <!-- ───────────────────── Clientes ───────────────────── -->
+    <section id="panel-clientes" class="panel oculto">
+      <div class="tarjeta">
+        <h2>Nuevo cliente</h2>
+        <form id="form-cliente">
+          <div class="fila">
+            <label>Nombre <input name="nombre" required minlength="3" placeholder="Gas Natural del Noroeste"></label>
+            <label>RFC <input name="rfc" required minlength="12" maxlength="13" placeholder="GNN9706053S3"></label>
+          </div>
+          <div class="fila">
+            <label>Días de crédito <input type="number" name="dias_credito" value="30" min="0" max="365"></label>
+            <label>Atraso promedio (días) <input type="number" name="dias_atraso_promedio" value="8" min="0" max="365" step="0.5"></label>
+            <label>Variabilidad (días) <input type="number" name="variabilidad_atraso" value="5" min="0" max="180" step="0.5"></label>
+          </div>
+          <button type="submit" class="primario">Guardar cliente</button>
+        </form>
+      </div>
+      <div class="tarjeta">
+        <h2>Clientes registrados</h2>
+        <div id="tabla-clientes"><p class="sutil">Cargando…</p></div>
+      </div>
+    </section>
+
+    <!-- ───────────────────── Facturas ───────────────────── -->
+    <section id="panel-facturas" class="panel oculto">
+      <div class="tarjeta">
+        <h2>Nueva factura</h2>
+        <form id="form-factura">
+          <div class="fila">
+            <label>Cliente
+              <select name="cliente_id" id="select-cliente" required></select>
+            </label>
+            <label>Folio <input name="folio" required placeholder="FAC03881"></label>
+            <label>Importe (pesos) <input type="number" name="importe" required min="0.01" step="0.01" placeholder="18560.00"></label>
+          </div>
+          <div class="fila">
+            <label>Fecha de emisión <input type="date" name="fecha_emision" required></label>
+            <label>Fecha de vencimiento <input type="date" name="fecha_vencimiento" required></label>
+          </div>
+          <button type="submit" class="primario">Guardar factura</button>
+        </form>
+      </div>
+      <div class="tarjeta">
+        <h2>Facturas</h2>
+        <div id="tabla-facturas"><p class="sutil">Cargando…</p></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="avisos" class="avisos"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

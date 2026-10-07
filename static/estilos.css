@@ -1,0 +1,162 @@
+:root {
+  --fondo: #0f1117;
+  --superficie: #171a23;
+  --superficie-2: #1e222e;
+  --borde: #2a2f3d;
+  --texto: #e6e8ef;
+  --sutil: #8b91a3;
+  --azul: #4f7cff;
+  --verde: #2fbf71;
+  --rojo: #e05260;
+  --ambar: #d9a22b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.contenedor { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
+
+header {
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+  padding: 18px 0;
+  margin-bottom: 26px;
+}
+
+.cabecera { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+h1 { font-size: 21px; font-weight: 600; }
+h2 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.sutil { color: var(--sutil); font-size: 13px; }
+
+/* ── Latido: la evidencia visual de que el servidor sigue respondiendo ── */
+.latido {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--superficie-2);
+  border: 1px solid var(--borde);
+  border-radius: 9px;
+  padding: 9px 15px;
+  min-width: 230px;
+}
+.latido strong { display: block; font-size: 13px; font-weight: 600; }
+.latido .sutil { font-size: 11.5px; }
+.pulso {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--sutil); flex-shrink: 0;
+  transition: background 0.15s;
+}
+.pulso.vivo { background: var(--verde); animation: latir 0.9s ease-out infinite; }
+.pulso.congelado { background: var(--rojo); animation: none; }
+@keyframes latir {
+  0%   { box-shadow: 0 0 0 0 rgba(47,191,113,0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(47,191,113,0); }
+  100% { box-shadow: 0 0 0 0 rgba(47,191,113,0); }
+}
+
+/* ── Pestañas ── */
+.pestanas { display: flex; gap: 6px; margin-bottom: 18px; }
+.pestanas button {
+  background: none; border: none; color: var(--sutil);
+  padding: 9px 15px; border-radius: 7px; cursor: pointer;
+  font-size: 14px; font-family: inherit;
+}
+.pestanas button:hover { background: var(--superficie); color: var(--texto); }
+.pestanas button.activa { background: var(--superficie-2); color: var(--texto); font-weight: 600; }
+
+.panel.oculto { display: none; }
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 11px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+/* ── Formularios ── */
+.fila { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+label { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 165px; font-size: 13px; color: var(--sutil); }
+input, select {
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 7px;
+  padding: 9px 11px;
+  color: var(--texto);
+  font-family: inherit;
+  font-size: 14px;
+}
+input:focus, select:focus { outline: none; border-color: var(--azul); }
+label small { font-size: 11.5px; }
+
+button {
+  font-family: inherit; font-size: 14px; cursor: pointer;
+  border: none; border-radius: 7px; padding: 10px 17px;
+  background: var(--superficie-2); color: var(--texto);
+}
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.primario { background: var(--azul); color: #fff; font-weight: 600; }
+button.peligro { background: var(--rojo); color: #fff; font-weight: 600; }
+button small { display: block; font-size: 11px; font-weight: 400; opacity: 0.85; }
+.botones { display: flex; gap: 11px; flex-wrap: wrap; margin: 16px 0 10px; }
+
+.aviso {
+  font-size: 12.5px; color: var(--ambar);
+  background: rgba(217,162,43,0.09);
+  border-left: 2.5px solid var(--ambar);
+  padding: 9px 13px; border-radius: 0 6px 6px 0;
+}
+
+/* ── Tablas ── */
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th {
+  text-align: left; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--sutil);
+  padding: 7px 9px; border-bottom: 1px solid var(--borde);
+}
+td { padding: 9px; border-bottom: 1px solid rgba(42,47,61,0.55); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: none; }
+
+.etiqueta { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+.etiqueta.pendiente { background: rgba(217,162,43,0.17); color: var(--ambar); }
+.etiqueta.parcial   { background: rgba(79,124,255,0.17); color: var(--azul); }
+.etiqueta.pagada    { background: rgba(47,191,113,0.17); color: var(--verde); }
+
+.mini { background: var(--superficie-2); padding: 5px 10px; font-size: 12px; }
+
+/* ── Resultado de la proyección ── */
+.resumen { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.dato {
+  flex: 1; min-width: 135px;
+  background: var(--superficie-2); border: 1px solid var(--borde);
+  border-radius: 9px; padding: 13px;
+}
+.dato .valor { font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.dato .etq { font-size: 11px; color: var(--sutil); margin-top: 3px; }
+.dato.destaca .valor { color: var(--verde); }
+
+.barra { height: 6px; background: var(--fondo); border-radius: 3px; overflow: hidden; margin-top: 7px; }
+.barra div { height: 100%; background: var(--azul); border-radius: 3px; }
+
+/* ── Avisos flotantes ── */
+.avisos { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 9px; z-index: 50; }
+.mensaje {
+  background: var(--superficie-2); border: 1px solid var(--borde);
+  border-left: 3px solid var(--azul);
+  padding: 11px 16px; border-radius: 7px; font-size: 13.5px;
+  max-width: 340px; animation: entrar 0.2s ease-out;
+}
+.mensaje.error { border-left-color: var(--rojo); }
+.mensaje.exito { border-left-color: var(--verde); }
+@keyframes entrar { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 640px) {
+  .cabecera { flex-direction: column; align-items: stretch; }
+  .fila { flex-direction: column; gap: 11px; }
+}

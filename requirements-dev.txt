@@ -1,0 +1,4 @@
+# Solo para correr pruebas.py. La aplicación no las necesita.
+-r requirements.txt
+mongomock-motor==0.0.36
+httpx==0.28.1
