@@ -64,6 +64,24 @@ Si la cadena de conexión está mal, **la aplicación no arranca**: hace un `pin
 al cluster durante el arranque. Es preferible a arrancar "bien" y fallar en la
 primera petición de un usuario.
 
+### En MongoDB Atlas
+
+Hacen falta tres cosas del lado del cluster:
+
+1. Un cluster **M0** (el gratuito) y un usuario de base de datos con permiso de
+   lectura y escritura.
+2. La cadena de conexión de **Connect → Drivers → Python**, con la contraseña
+   real sustituida en el marcador `<db_password>`.
+3. En **Network Access**, una entrada `0.0.0.0/0` en estado *Active*.
+
+El tercer punto es el que más confunde. Atlas filtra por IP de origen, así que
+un proyecto que funciona en la computadora donde se escribió falla en cualquier
+otra — y no con un mensaje claro, sino con un `ServerSelectionTimeoutError` que
+parece un error del programa.
+
+La base `cobranza_escuela` no hace falta crearla: Mongo la crea al primer
+`insert`.
+
 ---
 
 ## Endpoints

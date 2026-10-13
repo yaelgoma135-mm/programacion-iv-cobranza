@@ -318,7 +318,28 @@ const cuerpo = [
   ]),
   p('Dos de esas pruebas encontraron errores reales durante el desarrollo. La primera: la API devolvía «_id» en lugar de «id», porque en Pydantic el alias de un campo se usa también al serializar; se corrige con validation_alias, que aplica solo a la entrada. La segunda fue del propio arnés de pruebas, no del código, y vale la pena contarla porque casi la doy por buena: la prueba de RFC duplicado pasaba sin probar nada, porque los índices se crean en el lifespan y httpx no lo dispara.'),
 
+  h2('El error que ninguna prueba podía encontrar'),
+  p('Con las 21 pruebas en verde levanté el servidor en una consola normal de Windows y no arrancó. No alcanzó a atender una sola petición:'),
+  ...codigo([
+    "UnicodeEncodeError: 'charmap' codec can't encode character '\u2713'",
+    'ERROR:    Application startup failed. Exiting.',
+  ]),
+  p('El mensaje de bienvenida llevaba una palomita «✓». La consola de Windows no usa UTF-8 sino cp1252, que no tiene ese carácter; el print lanzaba la excepción dentro del lifespan y la aplicación moría durante el arranque, antes de abrir el puerto.'),
+  mixto([
+    'Lo interesante no es el error sino por qué tardó tanto en salir: yo lo probaba desde una terminal configurada en UTF-8, y esa terminal ',
+    ['escondía el problema'],
+    '. Las pruebas tampoco podían verlo, porque capturan la salida en vez de escribirla en una consola real. Era un fallo que solo existía en la computadora de alguien más.',
+  ]),
+  p('Lo corregí en dos capas. Los mensajes de arranque y cierre quedaron en ASCII puro; y sys.stdout se reconfigura con errors="replace" al importar la aplicación, de modo que ningún print futuro pueda repetir el accidente. La segunda capa importa más que la primera: un saludo en consola no debería tener la capacidad de impedir que arranque el servidor.'),
+
   h1('9. Cómo ejecutarlo'),
+
+  h2('Lo que debe estar listo en MongoDB Atlas'),
+  vineta('Un cluster M0 (el gratuito) y un usuario de base de datos con permiso de lectura y escritura.'),
+  vineta('La cadena de conexión que entrega Atlas en Connect → Drivers → Python, con la contraseña real sustituida en el marcador <db_password>. Esa cadena va en el archivo .env, que no se sube al repositorio.'),
+  vineta('En Network Access, una entrada 0.0.0.0/0 en estado Active. Atlas bloquea las conexiones por IP de origen, y si solo está autorizada la IP de quien desarrolló el proyecto, al abrirlo desde otra computadora no falla con un mensaje claro: falla con un ServerSelectionTimeoutError que parece un error del programa.'),
+  vineta('La base cobranza_escuela no hace falta crearla a mano. MongoDB la crea en el primer insert.'),
+
   ...codigo([
     '# 1. Instalar dependencias',
     'pip install -r requirements.txt',
@@ -341,7 +362,8 @@ const cuerpo = [
   vineta('Pulsar «Proyectar bloqueando»: el latido se pone rojo y marca los segundos que lleva sin responder, hasta que el cálculo termina.'),
 
   h1('10. Conclusiones'),
-  p('Lo que más me costó de este proyecto no fue escribir el código sino comprobar que hacía lo que yo creía. Tres veces di algo por bueno y al medirlo resultó que no: el latido que pintaba verde mientras el servidor estaba congelado, la prueba de RFC duplicado que pasaba sin índice, y la respuesta que devolvía «_id» donde yo esperaba «id». Las tres las encontré corriendo la aplicación, no leyéndola.'),
+  p('Lo que más me costó de este proyecto no fue escribir el código sino comprobar que hacía lo que yo creía. Cuatro veces di algo por bueno y al medirlo resultó que no: el latido que pintaba verde mientras el servidor estaba congelado, la prueba de RFC duplicado que pasaba sin índice, la respuesta que devolvía «_id» donde yo esperaba «id», y un servidor que no arrancaba en cuanto salía de mi terminal. Las cuatro las encontré corriendo la aplicación, no leyéndola.'),
+  p('De las cuatro, la última es la que más me enseñó. Las otras tres estaban en el código y podía encontrarlas yo solo; esa dependía del entorno de quien lo ejecutara, y mi propia forma de probar era justamente lo que la ocultaba. Un proyecto no está terminado cuando funciona en la máquina donde se escribió.'),
   mixto([
     'Sobre el tema de la práctica: entendí que ',
     ['asyncio no es paralelismo'],
