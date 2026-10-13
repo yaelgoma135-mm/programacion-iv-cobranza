@@ -85,7 +85,7 @@ async def main() -> None:
             }
         )
         total += importe
-    print(f"{len(FACTURAS)} facturas insertadas · cartera ${total:,.2f}")
+    print(f"{len(FACTURAS)} facturas insertadas - cartera ${total:,.2f}")
 
     await desconectar()
     print("\nListo. Levanta el servidor con:  py -m uvicorn app.main:app --reload")

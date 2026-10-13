@@ -5,6 +5,7 @@ Aquí se arma todo: el ciclo de vida de la conexión a MongoDB, las rutas de la
 API y el frontend servido como archivos estáticos.
 """
 
+import sys
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 from pathlib import Path
@@ -19,6 +20,16 @@ from .rutas import clientes, facturas, proyecciones
 
 RAIZ = Path(__file__).resolve().parent.parent
 ESTATICOS = RAIZ / "static"
+
+# La consola de Windows usa cp1252, no UTF-8. Un `print` con un carácter que esa
+# codificación no tiene lanza UnicodeEncodeError, y si ocurre dentro del lifespan
+# el servidor NO arranca. Un mensaje de bienvenida no debe poder tirar la
+# aplicación, así que los caracteres que la consola no sepa dibujar se sustituyen
+# en vez de reventar. Los mensajes de abajo son ASCII puro de todos modos; esto
+# es la red por si alguna ruta imprime un acento en una máquina con otra región.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+    sys.stderr.reconfigure(errors="replace")
 
 
 @asynccontextmanager
@@ -37,12 +48,12 @@ async def ciclo_de_vida(app: FastAPI) -> AsyncIterator[None]:
     """
     config = obtener_configuracion()
     await conectar(config.mongodb_uri, config.mongodb_base)
-    print(f"✓ Conectado a MongoDB · base '{config.mongodb_base}'")
+    print(f"[OK] Conectado a MongoDB - base '{config.mongodb_base}'")
     try:
         yield
     finally:
         await desconectar()
-        print("✓ Conexión a MongoDB cerrada")
+        print("[OK] Conexion a MongoDB cerrada")
 
 
 config = obtener_configuracion()
