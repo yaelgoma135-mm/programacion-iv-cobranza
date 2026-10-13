@@ -32,8 +32,9 @@ function cadenaDelEnv() {
   throw new Error('El .env no tiene MONGODB_URI.');
 }
 const CAPTURAS = path.join(DIR, 'capturas');
-const AZUL = '2F5496';
-const GRIS = '595959';
+// Todo el texto va en negro. La jerarquia se sostiene con el tamano y la
+// negrita de los titulos, no con el color.
+const NEGRO = '000000';
 
 // ─── Ayudas de formato ───────────────────────────────────────────────
 
@@ -43,11 +44,11 @@ const p = (texto, opts = {}) =>
 
 const h1 = (texto) =>
   new Paragraph({ heading: HeadingLevel.HEADING_1, spacing: { before: 360, after: 180 },
-    children: [new TextRun({ text: texto, size: 30, bold: true, color: AZUL })] });
+    children: [new TextRun({ text: texto, size: 30, bold: true, color: NEGRO })] });
 
 const h2 = (texto) =>
   new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 260, after: 130 },
-    children: [new TextRun({ text: texto, size: 25, bold: true, color: AZUL })] });
+    children: [new TextRun({ text: texto, size: 25, bold: true, color: NEGRO })] });
 
 /** Párrafo con partes en negrita: mezcla ['texto normal', ['negrita'], 'más'] */
 const mixto = (partes) =>
@@ -70,7 +71,7 @@ const vineta = (texto) =>
 
 const pie = (texto) =>
   new Paragraph({ spacing: { after: 240 }, alignment: AlignmentType.CENTER,
-    children: [new TextRun({ text: texto, size: 18, italics: true, color: GRIS })] });
+    children: [new TextRun({ text: texto, size: 18, italics: true, color: NEGRO })] });
 
 function imagen(archivo, leyenda) {
   const ruta = path.join(CAPTURAS, archivo);
@@ -107,13 +108,13 @@ function tabla(encabezados, filas, anchos) {
 
 const portada = [
   new Paragraph({ spacing: { before: 2400, after: 120 }, alignment: AlignmentType.CENTER,
-    children: [new TextRun({ text: 'Gestor de Cobranza', size: 56, bold: true, color: AZUL })] }),
+    children: [new TextRun({ text: 'Gestor de Cobranza', size: 56, bold: true, color: NEGRO })] }),
   new Paragraph({ spacing: { after: 900 }, alignment: AlignmentType.CENTER,
-    children: [new TextRun({ text: 'con Proyección de Flujo por Simulación Monte Carlo', size: 28, color: GRIS })] }),
+    children: [new TextRun({ text: 'con Proyección de Flujo por Simulación Monte Carlo', size: 28, color: NEGRO })] }),
   new Paragraph({ spacing: { after: 160 }, alignment: AlignmentType.CENTER,
     children: [new TextRun({ text: 'Proyecto final — Programación IV', size: 26, bold: true })] }),
   new Paragraph({ spacing: { after: 700 }, alignment: AlignmentType.CENTER,
-    children: [new TextRun({ text: 'API REST con FastAPI, MongoDB Atlas y concurrencia no bloqueante', size: 22, color: GRIS })] }),
+    children: [new TextRun({ text: 'API REST con FastAPI, MongoDB Atlas y concurrencia no bloqueante', size: 22, color: NEGRO })] }),
   new Paragraph({ spacing: { after: 90 }, alignment: AlignmentType.CENTER,
     children: [new TextRun({ text: 'Yael Gómez', size: 24, bold: true })] }),
   new Paragraph({ spacing: { after: 90 }, alignment: AlignmentType.CENTER,
@@ -122,7 +123,7 @@ const portada = [
     children: [new TextRun({ text: 'Profesora: Nicole Michelle Leyva Munguía', size: 22 })] }),
   new Paragraph({ alignment: AlignmentType.CENTER,
     children: [new TextRun({ text: new Date().toLocaleDateString('es-MX',
-      { day: 'numeric', month: 'long', year: 'numeric' }), size: 20, color: GRIS })] }),
+      { day: 'numeric', month: 'long', year: 'numeric' }), size: 20, color: NEGRO })] }),
   new Paragraph({ children: [new PageBreak()] }),
 ];
 
@@ -438,6 +439,16 @@ const doc = new Document({
   creator: 'Yael Gómez — 224164501',
   title: 'Gestor de Cobranza con Proyección Monte Carlo',
   description: 'Proyecto final de Programación IV',
+  // Word trae sus estilos Heading1/Heading2 en azul. Cada titulo ya lleva el
+  // color directo encima, pero el estilo tambien se redefine: si no, el panel
+  // de navegacion o un indice generado los seguirian pintando de azul.
+  styles: {
+    default: {
+      heading1: { run: { color: NEGRO } },
+      heading2: { run: { color: NEGRO } },
+      heading3: { run: { color: NEGRO } },
+    },
+  },
   numbering: {
     config: [{
       reference: 'vinetas',
