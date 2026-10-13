@@ -6,3 +6,8 @@ venv/
 .vscode/
 .idea/
 .DS_Store
+
+# Copias del documento que llevan la cadena de conexion dentro.
+# Se generan aparte con:
+#   node docs/generar-documento.js --con-conexion --salida <ruta fuera del repo>
+*con datos de conexion*.docx

@@ -12,6 +12,25 @@ const {
 } = require('docx');
 
 const DIR = __dirname;
+
+// El anexo con la cadena de conexion es OPCIONAL y se pide con --con-conexion.
+// La cadena NO se escribe aqui ni se pasa por la linea de comandos: se lee del
+// .env, que es el unico lugar donde vive. Asi la copia del repositorio nunca
+// puede llevar la contrasena por descuido.
+const CON_CONEXION = process.argv.includes('--con-conexion');
+const SALIDA = (() => {
+  const i = process.argv.indexOf('--salida');
+  return i !== -1 && process.argv[i + 1] ? process.argv[i + 1] : null;
+})();
+
+function cadenaDelEnv() {
+  const archivo = path.join(DIR, '..', '.env');
+  if (!fs.existsSync(archivo)) throw new Error('No existe el .env; no hay cadena que anexar.');
+  for (const linea of fs.readFileSync(archivo, 'utf8').split(/\r?\n/)) {
+    if (linea.startsWith('MONGODB_URI=')) return linea.slice('MONGODB_URI='.length).trim();
+  }
+  throw new Error('El .env no tiene MONGODB_URI.');
+}
 const CAPTURAS = path.join(DIR, 'capturas');
 const AZUL = '2F5496';
 const GRIS = '595959';
@@ -372,6 +391,47 @@ const cuerpo = [
   p('También me quedó claro por qué conviene que el código pesado no sepa nada de concurrencia. La simulación es una función síncrona normal que recibe datos y devuelve datos. Quien la llama decide mandarla a un hilo. Si mañana hiciera falta correrla en un proceso aparte o en una máquina distinta, la función no cambiaría.'),
 ];
 
+// ─── Anexo opcional con la cadena de conexion ────────────────────────
+
+const anexo = !CON_CONEXION ? [] : [
+  new Paragraph({ children: [new PageBreak()] }),
+
+  h1('Anexo. Datos de conexión y ejecución'),
+  p('Este anexo acompaña solo a la copia entregada. No forma parte del repositorio público, porque incluye la contraseña del usuario de base de datos.'),
+
+  h2('Cadena de conexión'),
+  p('El proyecto lee la configuración de un archivo .env que no se versiona. Hay que crearlo a partir de .env.example y dejar la variable MONGODB_URI con este valor:'),
+  ...codigo(['MONGODB_URI=' + cadenaDelEnv()]),
+  p('Las otras dos variables ya vienen con el valor correcto en .env.example: MONGODB_BASE=cobranza_escuela y MAX_ESCENARIOS=200000.'),
+
+  h2('Pasos para ejecutarlo'),
+  ...codigo([
+    '# 1. Instalar dependencias (requiere Python 3.11 o superior)',
+    'pip install -r requirements.txt',
+    '',
+    '# 2. Crear el archivo de configuracion',
+    'copy .env.example .env',
+    '#    y pegar la cadena de arriba en MONGODB_URI',
+    '',
+    '# 3. Levantar el servidor',
+    'py -m uvicorn app.main:app --reload',
+  ]),
+  p('La aplicación queda en http://localhost:8000 y la documentación interactiva de la API en http://localhost:8000/docs.'),
+  p('La base ya tiene cinco clientes y trece facturas cargados, así que el paso de sembrar.py no hace falta. Si se quisiera volver a empezar desde cero: py sembrar.py (borra y vuelve a cargar los datos de ejemplo).'),
+  p('El acceso por IP ya está abierto en Atlas, de modo que no hay nada que configurar del lado de la red.'),
+
+  h2('Si algo falla'),
+  vineta('ServerSelectionTimeoutError: el cluster no acepta la IP de origen. Se resuelve en Atlas, en Network Access, con una entrada 0.0.0.0/0 en estado Active. Debería estar ya puesta.'),
+  vineta('Authentication failed: la contraseña dentro de la cadena no es correcta, o se copió con un salto de línea en medio. Debe ir todo en un solo renglón.'),
+  vineta('La aplicación no arranca y no dice por qué: casi siempre es que falta el archivo .env, o que la línea tiene espacios alrededor del signo igual. Debe quedar MONGODB_URI=mongodb+srv://... sin comillas.'),
+
+  h2('Para revisar la parte de concurrencia'),
+  vineta('En la pestaña «Proyección», subir los escenarios a 150,000 o más.'),
+  vineta('Pulsar «Proyectar sin bloquear»: el indicador de arriba a la derecha sigue en verde y el resultado dice que el cálculo corrió en un hilo asyncio_N.'),
+  vineta('Pulsar «Proyectar bloqueando»: el mismo cálculo, sin asyncio.to_thread(). El indicador se pone rojo y cuenta los segundos que el servidor lleva sin responder.'),
+  vineta('Las pruebas automáticas se corren con: pip install -r requirements-dev.txt y luego py pruebas.py. Usan una base en memoria, así que no tocan el cluster.'),
+];
+
 // ─── Armado ──────────────────────────────────────────────────────────
 
 const doc = new Document({
@@ -391,12 +451,12 @@ const doc = new Document({
   sections: [{
     properties: { page: { size: { width: 12240, height: 15840 },
       margin: { top: 1300, right: 1300, bottom: 1300, left: 1300 } } },
-    children: [...portada, ...cuerpo],
+    children: [...portada, ...cuerpo, ...anexo],
   }],
 });
 
 Packer.toBuffer(doc).then((buf) => {
-  const salida = path.join(DIR, 'Proyecto Programacion IV - Gestor de Cobranza.docx');
+  const salida = SALIDA || path.join(DIR, 'Proyecto Programacion IV - Gestor de Cobranza.docx');
   fs.writeFileSync(salida, buf);
   console.log(`Generado: ${salida} (${Math.round(buf.length / 1024)} KB)`);
 });
